@@ -1,2 +1,3 @@
 (library
- (name camelochain))
+ (name lib)
+ (libraries sha))
