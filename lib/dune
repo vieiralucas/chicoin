@@ -1,3 +1,5 @@
 (library
  (name lib)
- (libraries sha))
+ (libraries sha)
+ (inline_tests)
+ (preprocess (pps ppx_inline_test)))
