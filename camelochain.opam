@@ -9,8 +9,10 @@ tags: ["blockchain" "cryptocurrency"]
 homepage: "https://github.com/vieiralucas/camelochain"
 bug-reports: "https://github.com/vieiralucas/camelochain/issues"
 depends: [
-  "ocaml"
-  "dune" {>= "2.9"}
+  "dune" {>= "3.4"}
+  "ocamlformat"
+  "sha" {>= "1.15"}
+  "ppx_inline_test" {>= "0.15"}
   "odoc" {with-doc}
 ]
 build: [
@@ -22,11 +24,9 @@ build: [
     name
     "-j"
     jobs
-    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
-  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/vieiralucas/camelochain.git"
