@@ -23,6 +23,7 @@
   (sha
    (>= 1.15))
   (ppx_inline_test
-   (>= 0.15)))
+   (>= 0.15))
+  ppx_deriving)
  (tags
   (blockchain cryptocurrency)))
