@@ -1,0 +1,11 @@
+(test
+ (name test_block)
+ (package camelochain)
+ (modules test_block)
+ (libraries alcotest camelochain))
+
+(test
+ (name test_chain)
+ (package camelochain)
+ (modules test_chain)
+ (libraries alcotest camelochain))

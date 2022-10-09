@@ -1,4 +1,4 @@
 (executable
  (public_name camelochain)
  (name main)
- (libraries lib))
+ (libraries camelochain))
