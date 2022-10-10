@@ -22,11 +22,9 @@
   ocamlformat
   (sha
    (>= 1.15))
-  (ppx_deriving
-   (>= 5.2))
-  (ppx_import
-   (>= 1.10))
   (alcotest
-   (>= 1.6)))
+   (>= 1.6))
+  (bisect_ppx
+   (>= 2.8)))
  (tags
   (blockchain cryptocurrency)))

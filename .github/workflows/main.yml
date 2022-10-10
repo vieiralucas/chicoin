@@ -32,5 +32,10 @@ jobs:
 
       - run: opam install . --deps-only --with-test -y
       - run: opam exec -- dune build
-      - run: opam exec -- dune runtest
+      - run: opam exec -- dune runtest --instrument-with bisect_ppx
+      - run: opam exec -- bisect-ppx-report html
+      - run: opam exec -- bisect-ppx-report send-to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST_NUMBER: ${{ github.event.number }}
       - run: opam exec -- dune fmt
