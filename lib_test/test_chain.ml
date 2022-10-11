@@ -5,6 +5,56 @@ open Camelochain.Chain
 let () =
   run "Chain"
     [
+      ( "empty",
+        [
+          ( "contains only genesis",
+            `Quick,
+            fun _ ->
+              (check int) "" 0 (List.length empty.blocks);
+              (check bool) "" true (Block.equal Block.genesis empty.genesis) );
+          ( "has difficulty 1",
+            `Quick,
+            fun _ -> (check int) "" 1 empty.difficulty );
+        ] );
+      ( "add_block",
+        [
+          ( "adds block to end of chain",
+            `Quick,
+            fun _ ->
+              let block : Block.t =
+                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+              in
+              let chain = add_block block empty in
+
+              (check int) "" 1 (List.length chain.blocks);
+              (check bool) "" true (Block.equal block (last_block chain)) );
+          ( "chain remains valid",
+            `Quick,
+            fun _ ->
+              let chain = empty in
+              (check bool) "" true (is_valid chain);
+              let block : Block.t =
+                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+              in
+              let chain = add_block block chain in
+              (check bool) "" true (is_valid chain) );
+        ] );
+      ( "last_block",
+        [
+          ( "returns genesis for empty chain",
+            `Quick,
+            fun _ ->
+              (check bool) "" true
+                (Block.equal Block.genesis (last_block empty)) );
+          ( "returns last block of the chain",
+            `Quick,
+            fun _ ->
+              let block : Block.t =
+                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+              in
+              let chain = add_block block empty in
+              (check bool) "" true (Block.equal block (last_block chain)) );
+        ] );
       ( "is_valid",
         [
           ( "returns true when empty",
@@ -55,27 +105,23 @@ let () =
               in
               (check bool) "" false (is_valid chain) );
         ] );
-      ( "add_block",
+      ( "mine",
         [
-          ( "adds block to end of chain",
+          ( "adds a new block to the end of the chain",
             `Quick,
             fun _ ->
-              let block : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
-              in
-              let chain = add_block block empty in
-
-              (check int) "" 1 (List.length chain.blocks);
-              (check bool) "" true (Block.equal block (last_block chain)) );
-          ( "chain remains valid",
+              let chain = mine empty in
+              (check int) "" 1 (List.length chain.blocks) );
+          ( "new block obeys difficulty",
             `Quick,
             fun _ ->
-              let chain = empty in
-              (check bool) "" true (is_valid chain);
-              let block : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
-              in
-              let chain = add_block block chain in
+              let chain = mine { empty with difficulty = 2 } in
+              let block = last_block chain in
+              (check bool) "" true (Block.obeys_difficulty 2 block) );
+          ( "new chain is valid",
+            `Quick,
+            fun _ ->
+              let chain = mine empty in
               (check bool) "" true (is_valid chain) );
         ] );
     ]
