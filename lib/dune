@@ -1,5 +1,5 @@
 (library
  (name camelochain)
- (libraries sha)
+ (libraries hex mirage-crypto cstruct)
  (instrumentation
   (backend bisect_ppx)))

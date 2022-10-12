@@ -1,7 +1,6 @@
-type block = { previous_hash : Sha256.t; nonce : int }
+type block = { previous_hash : string; nonce : int } [@@deriving eq]
 and t = block
 
 val genesis : block
-val hash : block -> Sha256.t
-val equal : block -> block -> bool
+val hash : block -> string
 val obeys_difficulty : int -> block -> bool

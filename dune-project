@@ -19,9 +19,14 @@
  (description "A blockchain written in OCaml")
  (depends
   dune
-  ocamlformat
+  (mirage-crypto
+   (>= 0.10))
+  (cstruct
+   (>= 6.0))
+  (hex (>= 1.5))
   (sha
    (>= 1.15))
+  ocamlformat
   (alcotest
    (>= 1.6))
   (bisect_ppx

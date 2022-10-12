@@ -10,8 +10,11 @@ homepage: "https://github.com/vieiralucas/camelochain"
 bug-reports: "https://github.com/vieiralucas/camelochain/issues"
 depends: [
   "dune" {>= "3.4"}
-  "ocamlformat"
+  "mirage-crypto" {>= "0.10"}
+  "cstruct" {>= "6.0"}
+  "hex" {>= "1.5"}
   "sha" {>= "1.15"}
+  "ocamlformat"
   "alcotest" {>= "1.6"}
   "bisect_ppx" {>= "2.8"}
   "odoc" {with-doc}

@@ -6,14 +6,13 @@ let last_block chain =
 
 let add_block block chain = { chain with blocks = block :: chain.blocks }
 let empty = { genesis = Block.genesis; blocks = []; difficulty = 1 }
-let equal_sha256 s1 s2 = Sha256.to_hex s1 = Sha256.to_hex s2
 
 let rec is_valid chain =
   match chain.blocks with
   | [] -> true
-  | b :: [] -> equal_sha256 b.previous_hash (Block.hash chain.genesis)
+  | b :: [] -> b.previous_hash = Block.hash chain.genesis
   | b1 :: b2 :: bs ->
-      if not (equal_sha256 b1.previous_hash (Block.hash b2)) then false
+      if b1.previous_hash <> Block.hash b2 then false
       else is_valid { chain with blocks = b2 :: bs }
 
 let mine chain =

@@ -11,7 +11,7 @@ let () =
             `Quick,
             fun _ ->
               (check int) "" 0 (List.length empty.blocks);
-              (check bool) "" true (Block.equal Block.genesis empty.genesis) );
+              (check bool) "" true (Block.genesis = empty.genesis) );
           ( "has difficulty 1",
             `Quick,
             fun _ -> (check int) "" 1 empty.difficulty );
@@ -27,7 +27,7 @@ let () =
               let chain = add_block block empty in
 
               (check int) "" 1 (List.length chain.blocks);
-              (check bool) "" true (Block.equal block (last_block chain)) );
+              (check bool) "" true (block = last_block chain) );
           ( "chain remains valid",
             `Quick,
             fun _ ->
@@ -43,9 +43,7 @@ let () =
         [
           ( "returns genesis for empty chain",
             `Quick,
-            fun _ ->
-              (check bool) "" true
-                (Block.equal Block.genesis (last_block empty)) );
+            fun _ -> (check bool) "" true (Block.genesis = last_block empty) );
           ( "returns last block of the chain",
             `Quick,
             fun _ ->
@@ -53,7 +51,7 @@ let () =
                 { previous_hash = Block.hash Block.genesis; nonce = 0 }
               in
               let chain = add_block block empty in
-              (check bool) "" true (Block.equal block (last_block chain)) );
+              (check bool) "" true (block = last_block chain) );
         ] );
       ( "is_valid",
         [
