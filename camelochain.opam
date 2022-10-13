@@ -9,14 +9,16 @@ tags: ["blockchain" "cryptocurrency"]
 homepage: "https://github.com/vieiralucas/camelochain"
 bug-reports: "https://github.com/vieiralucas/camelochain/issues"
 depends: [
-  "dune" {>= "3.4"}
-  "mirage-crypto" {>= "0.10"}
+  "alcotest" {>= "1.6"}
+  "bigstring" {>= "0.3"}
+  "bisect_ppx" {>= "2.8"}
   "cstruct" {>= "6.0"}
   "hex" {>= "1.5"}
-  "sha" {>= "1.15"}
+  "mirage-crypto" {>= "0.10"}
+  "mirage-crypto-rng" {>= "0.10"}
+  "secp256k1" {>= "0.4"}
+  "dune" {>= "3.4"}
   "ocamlformat"
-  "alcotest" {>= "1.6"}
-  "bisect_ppx" {>= "2.8"}
   "odoc" {with-doc}
 ]
 build: [

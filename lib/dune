@@ -1,5 +1,13 @@
 (library
  (name camelochain)
- (libraries hex mirage-crypto cstruct)
+ (libraries
+  bigstring
+  cstruct
+  hex
+  mirage-crypto
+  mirage-crypto-rng
+  mirage-crypto-rng.unix
+  secp256k1
+  tezos-base58)
  (instrumentation
   (backend bisect_ppx)))
