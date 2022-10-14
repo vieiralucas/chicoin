@@ -9,3 +9,9 @@
  (package camelochain)
  (modules test_chain)
  (libraries alcotest camelochain))
+
+(test
+ (name test_b58)
+ (package camelochain)
+ (modules test_b58)
+ (libraries alcotest camelochain))

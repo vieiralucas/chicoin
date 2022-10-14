@@ -34,6 +34,8 @@
    (>= 0.10))
   (secp256k1
    (>= 0.4))
+  (tezos-base58
+   (>= 1.0))
   dune
   ocamlformat)
  (tags
