@@ -11,6 +11,7 @@ let () =
             `Quick,
             fun _ ->
               (check int) "" 0 (List.length empty.blocks);
+              (check int) "" 0 (List.length empty.transactions);
               (check bool) "" true (Block.genesis = empty.genesis) );
           ( "has difficulty 1",
             `Quick,
@@ -22,19 +23,48 @@ let () =
             `Quick,
             fun _ ->
               let block : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [];
+                  nonce = 0;
+                }
               in
               let chain = add_block block empty in
 
               (check int) "" 1 (List.length chain.blocks);
               (check bool) "" true (block = last_block chain) );
+          ( "remove block transactions from chain transactions",
+            `Quick,
+            fun _ ->
+              let source = Key.Public.of_secret Key.Secret.generate in
+              let receiver = Key.Public.of_secret Key.Secret.generate in
+              let t1 : Transaction.t = { source; receiver; amount = 10 } in
+              let t2 : Transaction.t = { source; receiver; amount = 20 } in
+              let block : Block.t =
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [ t1 ];
+                  nonce = 0;
+                }
+              in
+              let chain =
+                empty |> add_transaction t1 |> add_transaction t2
+                |> add_block block
+              in
+
+              (check int) "" 1 (List.length chain.transactions);
+              (check bool) "" true (t2 = List.hd chain.transactions) );
           ( "chain remains valid",
             `Quick,
             fun _ ->
               let chain = empty in
               (check bool) "" true (is_valid chain);
               let block : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [];
+                  nonce = 0;
+                }
               in
               let chain = add_block block chain in
               (check bool) "" true (is_valid chain) );
@@ -48,7 +78,11 @@ let () =
             `Quick,
             fun _ ->
               let block : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [];
+                  nonce = 0;
+                }
               in
               let chain = add_block block empty in
               (check bool) "" true (block = last_block chain) );
@@ -61,11 +95,18 @@ let () =
           ( "returns true when last block points to genesis",
             `Quick,
             fun _ ->
-              let chain =
+              let chain : Chain.t =
                 {
                   genesis = Block.genesis;
                   blocks =
-                    [ { previous_hash = Block.hash Block.genesis; nonce = 0 } ];
+                    [
+                      {
+                        previous_hash = Block.hash Block.genesis;
+                        transactions = [];
+                        nonce = 0;
+                      };
+                    ];
+                  transactions = [];
                   difficulty = 0;
                 }
               in
@@ -74,30 +115,48 @@ let () =
             `Quick,
             fun _ ->
               let b1 : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [];
+                  nonce = 0;
+                }
               in
-              let b2 : Block.t = { previous_hash = Block.hash b1; nonce = 0 } in
-              let b3 : Block.t = { previous_hash = Block.hash b2; nonce = 0 } in
+              let b2 : Block.t =
+                { previous_hash = Block.hash b1; transactions = []; nonce = 0 }
+              in
+              let b3 : Block.t =
+                { previous_hash = Block.hash b2; transactions = []; nonce = 0 }
+              in
               (check bool) "" true
                 (is_valid
                    {
                      genesis = Block.genesis;
                      blocks = [ b3; b2; b1 ];
+                     transactions = [];
                      difficulty = 0;
                    }) );
           ( "returns false when content of a block changes",
             `Quick,
             fun _ ->
               let b1 : Block.t =
-                { previous_hash = Block.hash Block.genesis; nonce = 0 }
+                {
+                  previous_hash = Block.hash Block.genesis;
+                  transactions = [];
+                  nonce = 0;
+                }
               in
-              let b2 : Block.t = { previous_hash = Block.hash b1; nonce = 0 } in
-              let b3 : Block.t = { previous_hash = Block.hash b2; nonce = 0 } in
+              let b2 : Block.t =
+                { previous_hash = Block.hash b1; transactions = []; nonce = 0 }
+              in
+              let b3 : Block.t =
+                { previous_hash = Block.hash b2; transactions = []; nonce = 0 }
+              in
               let b2 = { b2 with nonce = 1 } in
               let chain =
                 {
                   genesis = Block.genesis;
                   blocks = [ b3; b2; b1 ];
+                  transactions = [];
                   difficulty = 0;
                 }
               in

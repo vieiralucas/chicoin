@@ -1,11 +1,28 @@
-type chain = { genesis : Block.t; blocks : Block.t list; difficulty : int }
+type chain = {
+  genesis : Block.t;
+  blocks : Block.t list;
+  transactions : Transaction.t list;
+  difficulty : int;
+}
+
 and t = chain
 
 let last_block chain =
   match List.nth_opt chain.blocks 0 with Some b -> b | None -> chain.genesis
 
-let add_block block chain = { chain with blocks = block :: chain.blocks }
-let empty = { genesis = Block.genesis; blocks = []; difficulty = 1 }
+let add_block block chain =
+  {
+    chain with
+    blocks = block :: chain.blocks;
+    transactions =
+      (* TODO: improve performance here *)
+      List.filter
+        (fun t1 -> not (List.exists (fun t2 -> t1 = t2) block.transactions))
+        chain.transactions;
+  }
+
+let empty =
+  { genesis = Block.genesis; blocks = []; transactions = []; difficulty = 1 }
 
 let rec is_valid chain =
   match chain.blocks with
@@ -21,5 +38,15 @@ let mine chain =
     else pow { block with nonce = block.nonce + 1 }
   in
   let lb = last_block chain in
-  let block = pow { previous_hash = Block.hash lb; nonce = 0 } in
+  let block =
+    pow
+      {
+        previous_hash = Block.hash lb;
+        transactions = chain.transactions;
+        nonce = 0;
+      }
+  in
   add_block block chain
+
+let add_transaction transaction chain =
+  { chain with transactions = transaction :: chain.transactions }

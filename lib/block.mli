@@ -1,4 +1,10 @@
-type block = { previous_hash : string; nonce : int } [@@deriving eq]
+type block = {
+  previous_hash : string;
+  transactions : Transaction.t list;
+  nonce : int;
+}
+[@@deriving eq]
+
 and t = block
 
 val genesis : block

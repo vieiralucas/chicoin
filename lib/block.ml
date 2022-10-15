@@ -1,14 +1,27 @@
 open Mirage_crypto.Hash
 
-type block = { previous_hash : string; nonce : int } [@@deriving eq]
+type block = {
+  previous_hash : string;
+  transactions : Transaction.t list;
+  nonce : int;
+}
+[@@deriving eq]
+
 and t = block
 
 let sha_s s = SHA256.get s |> Hex.of_cstruct |> Hex.show
-let genesis = { previous_hash = sha_s SHA256.empty; nonce = 0 }
+
+let genesis =
+  { previous_hash = sha_s SHA256.empty; transactions = []; nonce = 0 }
 
 let hash block =
   let h = SHA256.empty in
   let h = Cstruct.string block.previous_hash |> SHA256.feed h in
+  let h =
+    Cstruct.concat (List.map Transaction.to_bin block.transactions)
+    |> SHA256.feed h
+  in
+  (* TODO: convert int to bin instead of int -> str -> bin *)
   let h = Cstruct.string (string_of_int block.nonce) |> SHA256.feed h in
   sha_s h
 
