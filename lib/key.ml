@@ -26,8 +26,20 @@ module Secret = struct
 end
 
 module Public = struct
-  type key = Secp256k1.Key.public Secp256k1.Key.t
-  type t = key
+  type pub = Secp256k1.Key.public Secp256k1.Key.t
+  type t = pub
 
   let of_secret = Secp256k1.Key.neuterize_exn context
+
+  let to_b58 pub =
+    pub |> Secp256k1.Key.to_bytes context |> Bigstring.to_string |> B58.encode
+
+  let to_b58_s pub = to_b58 pub |> B58.show
+
+  let of_b58 b58 =
+    B58.decode b58 |> Bigstring.of_string
+    |> Secp256k1.Key.read_pk context
+    |> Result.to_option
+
+  let of_b58_s str = Option.bind (B58.of_string str) of_b58
 end

@@ -10,8 +10,12 @@ module Secret : sig
 end
 
 module Public : sig
-  type key = Secp256k1.Key.public Secp256k1.Key.t
-  type t = key
+  type pub = Secp256k1.Key.public Secp256k1.Key.t
+  type t = pub
 
-  val of_secret : Secret.t -> key
+  val of_secret : Secret.t -> pub
+  val to_b58 : pub -> B58.t
+  val to_b58_s : pub -> string
+  val of_b58 : B58.t -> pub option
+  val of_b58_s : string -> pub option
 end
