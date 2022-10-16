@@ -1,6 +1,6 @@
 type block = {
   previous_hash : Hash.t;
-  transactions : Transaction.t list;
+  transactions : Transaction.Signed.t list;
   nonce : int;
 }
 

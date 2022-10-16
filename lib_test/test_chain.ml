@@ -4,8 +4,9 @@ open Camelochain.Chain
 
 let check_block = testable Block.pp_block Block.equal_block
 
-let check_transaction =
-  testable Transaction.pp_transaction Transaction.equal_transaction
+let check_signed_transaction =
+  testable Transaction.Signed.pp_signed_transaction
+    Transaction.Signed.equal_signed_transaction
 
 let () =
   run "Chain"
@@ -41,10 +42,13 @@ let () =
           ( "remove block transactions from chain transactions",
             `Quick,
             fun _ ->
-              let source = Key.Public.of_secret Key.Secret.generate in
-              let receiver = Key.Public.of_secret Key.Secret.generate in
+              let secret = Key.Secret.generate () in
+              let source = Key.Public.of_secret secret in
+              let receiver = Key.Public.of_secret secret in
               let t1 : Transaction.t = { source; receiver; amount = 10 } in
+              let t1 = Transaction.Signed.sign t1 secret |> Option.get in
               let t2 : Transaction.t = { source; receiver; amount = 20 } in
+              let t2 = Transaction.Signed.sign t2 secret |> Option.get in
               let block : Block.t =
                 {
                   previous_hash = Block.hash Block.genesis;
@@ -58,7 +62,9 @@ let () =
               in
 
               (check int) "" 1 (List.length chain.transactions);
-              (check check_transaction) "" t2 (List.hd chain.transactions) );
+              (check check_signed_transaction)
+                "" t2
+                (List.hd chain.transactions) );
           ( "chain remains valid",
             `Quick,
             fun _ ->

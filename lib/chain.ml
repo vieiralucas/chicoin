@@ -1,7 +1,7 @@
 type chain = {
   genesis : Block.t;
   blocks : Block.t list;
-  transactions : Transaction.t list;
+  transactions : Transaction.Signed.t list;
   difficulty : int;
 }
 

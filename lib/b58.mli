@@ -1,5 +1,5 @@
 type b58 = B58 of string
-type t = b58 [@@deriving eq]
+type t = b58 [@@deriving eq, show]
 
 val encode : string -> b58
 val decode : b58 -> string

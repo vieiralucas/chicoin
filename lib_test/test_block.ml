@@ -24,19 +24,26 @@ let () =
           ( "blocks with different transactions are not equal",
             `Quick,
             fun _ ->
-              let t1 : Transaction.t =
-                {
-                  source = Key.Public.of_secret Key.Secret.generate;
-                  receiver = Key.Public.of_secret Key.Secret.generate;
-                  amount = 1;
-                }
+              let secret = Key.Secret.generate () in
+              let t1 : Transaction.Signed.t =
+                Transaction.Signed.sign
+                  {
+                    source = Key.Public.of_secret secret;
+                    receiver = Key.Public.of_secret secret;
+                    amount = 1;
+                  }
+                  secret
+                |> Option.get
               in
-              let t2 : Transaction.t =
-                {
-                  source = Key.Public.of_secret Key.Secret.generate;
-                  receiver = Key.Public.of_secret Key.Secret.generate;
-                  amount = 2;
-                }
+              let t2 : Transaction.Signed.t =
+                Transaction.Signed.sign
+                  {
+                    source = Key.Public.of_secret secret;
+                    receiver = Key.Public.of_secret secret;
+                    amount = 2;
+                  }
+                  secret
+                |> Option.get
               in
               (check @@ neg @@ check_block)
                 ""
@@ -85,10 +92,12 @@ let () =
               in
               let h1 = hash b1 in
 
-              let source = Key.Secret.generate |> Key.Public.of_secret in
-              let receiver = Key.Secret.generate |> Key.Public.of_secret in
-              let transaction : Transaction.t =
-                { source; receiver; amount = 1 }
+              let secret = Key.Secret.generate () in
+              let source = Key.Public.of_secret secret in
+              let receiver = Key.Public.of_secret secret in
+              let transaction : Transaction.Signed.t =
+                Transaction.Signed.sign { source; receiver; amount = 1 } secret
+                |> Option.get
               in
               let b2 =
                 {

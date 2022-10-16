@@ -1,6 +1,6 @@
 type block = {
   previous_hash : Hash.t;
-  transactions : Transaction.t list;
+  transactions : Transaction.Signed.t list;
   nonce : int;
 }
 
@@ -11,7 +11,7 @@ let genesis = { previous_hash = Hash.empty; transactions = []; nonce = 0 }
 let hash block =
   let b = Hash.show block.previous_hash |> Cstruct.string in
   let b =
-    Cstruct.concat (List.map Transaction.to_bin block.transactions)
+    Cstruct.concat (List.map Transaction.Signed.to_bin block.transactions)
     |> Cstruct.append b
   in
   (* TODO: convert int to bin instead of int -> str -> bin *)

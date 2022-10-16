@@ -1,5 +1,5 @@
 type b58 = B58 of string
-and t = b58 [@@deriving eq]
+and t = b58 [@@deriving eq, show]
 
 let encode str =
   let (Tezos_base58.Base58 str) = Tezos_base58.encode ~prefix:"" str in

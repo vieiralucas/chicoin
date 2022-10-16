@@ -1,7 +1,7 @@
 type chain = {
   genesis : Block.t;
   blocks : Block.t list;
-  transactions : Transaction.t list;
+  transactions : Transaction.Signed.t list;
   difficulty : int;
 }
 
@@ -12,4 +12,4 @@ val add_block : Block.t -> chain -> chain
 val last_block : chain -> Block.t
 val is_valid : chain -> bool
 val mine : chain -> chain
-val add_transaction : Transaction.t -> chain -> chain
+val add_transaction : Transaction.Signed.t -> chain -> chain
