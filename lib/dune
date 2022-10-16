@@ -9,5 +9,7 @@
   mirage-crypto-rng.unix
   secp256k1
   tezos-base58)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq))
  (instrumentation
   (backend bisect_ppx)))

@@ -12,7 +12,7 @@ let () =
             `Quick,
             fun _ ->
               (check string) "" b58_test_str
-                (B58.encode "testing b58" |> B58.show) );
+                (B58.encode "testing b58" |> B58.to_string) );
         ] );
       ( "decode",
         [
@@ -38,7 +38,7 @@ let () =
           ( "extracts the string",
             `Quick,
             fun _ ->
-              (check string) "" b58_test_str (B58.B58 b58_test_str |> B58.show)
-          );
+              (check string) "" b58_test_str
+                (B58.B58 b58_test_str |> B58.to_string) );
         ] );
     ]

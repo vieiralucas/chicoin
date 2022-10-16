@@ -1,6 +1,6 @@
 module Secret : sig
   type secret = Secp256k1.Key.secret Secp256k1.Key.t
-  type t = secret
+  type t = secret [@@deriving eq]
 
   val generate : secret
   val to_b58 : secret -> B58.t
@@ -11,7 +11,7 @@ end
 
 module Public : sig
   type pub = Secp256k1.Key.public Secp256k1.Key.t
-  type t = pub
+  type t = pub [@@deriving eq, show]
 
   val of_secret : Secret.t -> pub
   val to_b58 : pub -> B58.t

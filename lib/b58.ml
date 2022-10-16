@@ -1,5 +1,5 @@
 type b58 = B58 of string
-type t = b58
+and t = b58 [@@deriving eq]
 
 let encode str =
   let (Tezos_base58.Base58 str) = Tezos_base58.encode ~prefix:"" str in
@@ -13,4 +13,4 @@ let of_string str =
   |> Tezos_base58.decode ~prefix:""
   |> Option.map (fun _ -> B58 str)
 
-let show (B58 b58) = b58
+let to_string (B58 b58) = b58

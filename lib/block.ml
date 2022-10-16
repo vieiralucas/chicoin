@@ -1,31 +1,24 @@
-open Mirage_crypto.Hash
-
 type block = {
-  previous_hash : string;
+  previous_hash : Hash.t;
   transactions : Transaction.t list;
   nonce : int;
 }
-[@@deriving eq]
 
-and t = block
+and t = block [@@deriving eq, show]
 
-let sha_s s = SHA256.get s |> Hex.of_cstruct |> Hex.show
-
-let genesis =
-  { previous_hash = sha_s SHA256.empty; transactions = []; nonce = 0 }
+let genesis = { previous_hash = Hash.empty; transactions = []; nonce = 0 }
 
 let hash block =
-  let h = SHA256.empty in
-  let h = Cstruct.string block.previous_hash |> SHA256.feed h in
-  let h =
+  let b = Hash.show block.previous_hash |> Cstruct.string in
+  let b =
     Cstruct.concat (List.map Transaction.to_bin block.transactions)
-    |> SHA256.feed h
+    |> Cstruct.append b
   in
   (* TODO: convert int to bin instead of int -> str -> bin *)
-  let h = Cstruct.string (string_of_int block.nonce) |> SHA256.feed h in
-  sha_s h
+  let b = Cstruct.string (string_of_int block.nonce) |> Cstruct.append b in
+  Hash.of_bin b
 
 let obeys_difficulty difficulty block =
   let h = hash block in
   let prefix = String.make difficulty '0' in
-  String.starts_with ~prefix h
+  Hash.starts_with prefix h

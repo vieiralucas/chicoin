@@ -7,6 +7,7 @@ type transaction = {
   amount : int;
 }
 
-type t = transaction
+and t = transaction [@@deriving eq, show]
 
 val to_bin : transaction -> Cstruct.t
+val hash : transaction -> Hash.t

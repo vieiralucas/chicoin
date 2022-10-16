@@ -2,6 +2,11 @@ open Alcotest
 open Camelochain
 open Camelochain.Chain
 
+let check_block = testable Block.pp_block Block.equal_block
+
+let check_transaction =
+  testable Transaction.pp_transaction Transaction.equal_transaction
+
 let () =
   run "Chain"
     [
@@ -12,7 +17,7 @@ let () =
             fun _ ->
               (check int) "" 0 (List.length empty.blocks);
               (check int) "" 0 (List.length empty.transactions);
-              (check bool) "" true (Block.genesis = empty.genesis) );
+              (check check_block) "" Block.genesis empty.genesis );
           ( "has difficulty 1",
             `Quick,
             fun _ -> (check int) "" 1 empty.difficulty );
@@ -32,7 +37,7 @@ let () =
               let chain = add_block block empty in
 
               (check int) "" 1 (List.length chain.blocks);
-              (check bool) "" true (block = last_block chain) );
+              (check check_block) "" block (last_block chain) );
           ( "remove block transactions from chain transactions",
             `Quick,
             fun _ ->
@@ -53,7 +58,7 @@ let () =
               in
 
               (check int) "" 1 (List.length chain.transactions);
-              (check bool) "" true (t2 = List.hd chain.transactions) );
+              (check check_transaction) "" t2 (List.hd chain.transactions) );
           ( "chain remains valid",
             `Quick,
             fun _ ->
@@ -85,7 +90,7 @@ let () =
                 }
               in
               let chain = add_block block empty in
-              (check bool) "" true (block = last_block chain) );
+              (check check_block) "" block (last_block chain) );
         ] );
       ( "is_valid",
         [

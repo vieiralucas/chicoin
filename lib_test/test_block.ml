@@ -2,6 +2,12 @@ open Alcotest
 open Camelochain
 open Camelochain.Block
 
+let check_block = testable Block.pp_block Block.equal_block
+let check_hash = testable Hash.pp_hash Hash.equal_hash
+
+let genesis_hash =
+  Hash.Hash "8b19385e5be86166f9b19c9aa29cd505a327c9d9dd4a11ac9a3e2183c3991c62"
+
 let () =
   run "Block"
     [
@@ -9,12 +15,12 @@ let () =
         [
           ( "genesis is equal to genesis",
             `Quick,
-            fun _ -> (check bool) "" true (genesis = genesis) );
+            fun _ -> (check check_block) "" genesis genesis );
           ( "blocks with different nonce are not equal",
             `Quick,
             fun _ ->
-              (check bool) "" true
-                ({ genesis with nonce = 0 } <> { genesis with nonce = 1 }) );
+              (check @@ neg @@ check_block)
+                "" { genesis with nonce = 0 } { genesis with nonce = 1 } );
           ( "blocks with different transactions are not equal",
             `Quick,
             fun _ ->
@@ -32,21 +38,20 @@ let () =
                   amount = 2;
                 }
               in
-              (check bool) "" true
-                ({ genesis with transactions = [] }
-                <> { genesis with transactions = [ t1 ] });
-              (check bool) "" true
-                ({ genesis with transactions = [ t1 ] }
-                <> { genesis with transactions = [ t2 ] }) );
+              (check @@ neg @@ check_block)
+                ""
+                { genesis with transactions = [] }
+                { genesis with transactions = [ t1 ] };
+              (check @@ neg @@ check_block)
+                ""
+                { genesis with transactions = [ t1 ] }
+                { genesis with transactions = [ t2 ] } );
         ] );
       ( "genesis",
         [
           ( "has a known hash",
             `Quick,
-            fun _ ->
-              (check string) ""
-                "8cb68fe2a0d5762d32bc532e1c224d68cb9f1f93e63f3e1cef15548b8ff8e895"
-                (hash genesis) );
+            fun _ -> (check check_hash) "" genesis_hash (hash genesis) );
         ] );
       ( "hash",
         [
@@ -54,26 +59,30 @@ let () =
             `Quick,
             fun _ ->
               let h1 =
-                hash { previous_hash = ""; transactions = []; nonce = 0 }
+                hash
+                  { previous_hash = Hash.empty; transactions = []; nonce = 0 }
               in
               let h2 =
-                hash { previous_hash = ""; transactions = []; nonce = 1 }
+                hash
+                  { previous_hash = Hash.empty; transactions = []; nonce = 1 }
               in
-              (check @@ neg @@ string) "" h1 h2 );
+              (check @@ neg @@ check_hash) "" h1 h2 );
           ( "depends on previous_hash",
             `Quick,
             fun _ ->
               let h1 =
-                hash { previous_hash = "h1"; transactions = []; nonce = 0 }
+                hash { previous_hash = Hash "h1"; transactions = []; nonce = 0 }
               in
               let h2 =
-                hash { previous_hash = "h2"; transactions = []; nonce = 0 }
+                hash { previous_hash = Hash "h2"; transactions = []; nonce = 0 }
               in
-              (check @@ neg @@ string) "" h1 h2 );
+              (check @@ neg @@ check_hash) "" h1 h2 );
           ( "depends on transactions",
             `Quick,
             fun _ ->
-              let b1 = { previous_hash = ""; transactions = []; nonce = 0 } in
+              let b1 =
+                { previous_hash = Hash.empty; transactions = []; nonce = 0 }
+              in
               let h1 = hash b1 in
 
               let source = Key.Secret.generate |> Key.Public.of_secret in
@@ -83,37 +92,36 @@ let () =
               in
               let b2 =
                 {
-                  previous_hash = "";
+                  previous_hash = Hash.empty;
                   transactions = [ transaction ];
                   nonce = 0;
                 }
               in
               let h2 = hash b2 in
 
-              (check @@ neg @@ string) "" h1 h2 );
+              (check @@ neg @@ check_hash) "" h1 h2 );
         ] );
       ( "obeys_difficulty",
         [
           ( "returns true when hash starts with right amount of zeros",
             `Quick,
             fun _ ->
-              let h =
-                "8cb68fe2a0d5762d32bc532e1c224d68cb9f1f93e63f3e1cef15548b8ff8e895"
+              let b1 =
+                { previous_hash = genesis_hash; transactions = []; nonce = 15 }
               in
-
-              let b1 = { previous_hash = h; transactions = []; nonce = 10 } in
               (check bool) "" true (obeys_difficulty 1 b1);
 
-              let b2 = { previous_hash = h; transactions = []; nonce = 1187 } in
+              let b2 =
+                { previous_hash = genesis_hash; transactions = []; nonce = 50 }
+              in
               (check bool) "" true (obeys_difficulty 2 b2) );
           ( "returns false when hash does not start with the right amount of \
              zeros",
             `Quick,
             fun _ ->
-              let h =
-                "8cb68fe2a0d5762d32bc532e1c224d68cb9f1f93e63f3e1cef15548b8ff8e895"
+              let b =
+                { previous_hash = genesis_hash; transactions = []; nonce = 0 }
               in
-              let b = { previous_hash = h; transactions = []; nonce = 0 } in
               (check bool) "" false (obeys_difficulty 1 b) );
         ] );
     ]

@@ -18,6 +18,7 @@ depends: [
   "mirage-crypto-rng" {>= "0.10"}
   "secp256k1" {>= "0.4"}
   "tezos-base58" {>= "1.0"}
+  "ppx_deriving" {>= "5.2"}
   "dune" {>= "3.4"}
   "ocamlformat"
   "odoc" {with-doc}

@@ -36,6 +36,8 @@
    (>= 0.4))
   (tezos-base58
    (>= 1.0))
+  (ppx_deriving
+   (>= 5.2))
   dune
   ocamlformat)
  (tags
