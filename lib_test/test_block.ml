@@ -53,6 +53,25 @@ let () =
                 ""
                 { genesis with transactions = [ t1 ] }
                 { genesis with transactions = [ t2 ] } );
+          ( "blocks with different nonce are not equal",
+            `Quick,
+            fun _ ->
+              (check @@ neg @@ check_block)
+                "" { genesis with nonce = 1 } { genesis with nonce = 2 } );
+        ] );
+      ( "show",
+        [
+          ( "has a show function",
+            `Quick,
+            fun _ ->
+              let str =
+                "{ Block.previous_hash =\n\
+                \  (Hash.Hash\n\
+                \     \
+                 \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\");\n\
+                \  transactions = []; nonce = 0 }"
+              in
+              (check string) "" str (show genesis) );
         ] );
       ( "genesis",
         [
