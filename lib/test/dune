@@ -14,4 +14,10 @@
  (name test_b58)
  (package camelochain)
  (modules test_b58)
- (libraries alcotest camelochain))
+ (libraries alcotest camelochain qcheck-alcotest))
+
+(test
+ (name test_key)
+ (package camelochain)
+ (modules test_key)
+ (libraries alcotest camelochain qcheck-alcotest))

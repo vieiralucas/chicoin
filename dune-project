@@ -38,6 +38,8 @@
    (>= 1.0))
   (ppx_deriving
    (>= 5.2))
+  (qcheck-alcotest
+   (>= 0.19))
   dune
   ocamlformat)
  (tags

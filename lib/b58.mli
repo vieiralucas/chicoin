@@ -1,4 +1,4 @@
-type b58 = B58 of string
+type b58 = private B58 of string
 type t = b58 [@@deriving eq, show]
 
 val encode : string -> b58

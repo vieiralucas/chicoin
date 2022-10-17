@@ -1,5 +1,7 @@
 let () = Mirage_crypto_rng_unix.initialize ()
-let context = Secp256k1.Context.create []
+
+let context =
+  Secp256k1.Context.create [ Secp256k1.Context.Sign; Secp256k1.Context.Verify ]
 
 module Secret = struct
   type secret = Secp256k1.Key.secret Secp256k1.Key.t
@@ -18,12 +20,12 @@ module Secret = struct
   let to_b58_s secret = to_b58 secret |> B58.to_string
 
   let of_b58 b58 =
-    B58.decode b58 |> Bigstring.of_string
-    |> Secp256k1.Key.read_sk context
-    |> Result.to_option
+    B58.decode b58 |> Bigstring.of_string |> Secp256k1.Key.read_sk_exn context
 
-  let of_b58_s str = Option.bind (B58.of_string str) of_b58
+  let of_b58_s str = Option.map of_b58 (B58.of_string str)
   let equal = Secp256k1.Key.equal
+  let pp fmt secret = to_b58 secret |> B58.pp fmt
+  let show secret = to_b58_s secret
 end
 
 module Public = struct
@@ -38,13 +40,11 @@ module Public = struct
   let to_b58_s pub = to_b58 pub |> B58.to_string
 
   let of_b58 b58 =
-    B58.decode b58 |> Bigstring.of_string
-    |> Secp256k1.Key.read_pk context
-    |> Result.to_option
+    B58.decode b58 |> Bigstring.of_string |> Secp256k1.Key.read_pk_exn context
 
-  let of_b58_s str = Option.bind (B58.of_string str) of_b58
+  let of_b58_s str = Option.map of_b58 (B58.of_string str)
   let equal = Secp256k1.Key.equal
-  let pp fmt pub = Format.fprintf fmt "%s" (to_b58_s pub)
+  let pp fmt pub = to_b58 pub |> B58.pp fmt
   let show = to_b58_s
 end
 
