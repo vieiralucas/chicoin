@@ -45,9 +45,13 @@ let () =
               let secret = Key.Secret.generate () in
               let source = Key.Public.of_secret secret in
               let receiver = Key.Public.of_secret secret in
-              let t1 : Transaction.t = { source; receiver; amount = 10 } in
+              let t1 : Transaction.Transaction.t =
+                { source; receiver; amount = 10 }
+              in
               let t1 = Transaction.Signed.sign t1 secret |> Option.get in
-              let t2 : Transaction.t = { source; receiver; amount = 20 } in
+              let t2 : Transaction.Transaction.t =
+                { source; receiver; amount = 20 }
+              in
               let t2 = Transaction.Signed.sign t2 secret |> Option.get in
               let block : Block.t =
                 {
@@ -57,8 +61,9 @@ let () =
                 }
               in
               let chain =
-                empty |> add_transaction t1 |> add_transaction t2
-                |> add_block block
+                Result.bind (add_transaction t1 empty) (add_transaction t2)
+                |> Result.map (add_block block)
+                |> Result.get_ok
               in
 
               (check int) "" 1 (List.length chain.transactions);

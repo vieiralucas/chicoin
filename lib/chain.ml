@@ -48,5 +48,33 @@ let mine chain =
   in
   add_block block chain
 
-let add_transaction transaction chain =
-  { chain with transactions = transaction :: chain.transactions }
+let funds_from_transaction (pk : Key.Public.t) (trx : Transaction.Transaction.t)
+    =
+  match (trx.source = pk, trx.receiver = pk) with
+  | true, false -> trx.amount * -1
+  | false, true -> trx.amount
+  | _ -> 0
+
+let funds_from_block (pk : Key.Public.t) (block : Block.t) =
+  let trxs = block.transactions in
+  List.fold_left
+    (fun amount (trx : Transaction.Signed.t) ->
+      amount + funds_from_transaction pk trx.transaction)
+    0 trxs
+
+let funds_from_chain (pk : Key.Public.t) (chain : chain) =
+  let amount =
+    List.fold_left
+      (fun amount block -> amount + funds_from_block pk block)
+      0 chain.blocks
+  in
+  amount + funds_from_block pk chain.genesis
+
+type add_transaction_error = Invalid_signature | Not_enought_funds
+
+let add_transaction trx chain =
+  if not (Transaction.Signed.verify trx) then Result.error Invalid_signature
+  else
+    let funds = funds_from_chain trx.transaction.source chain in
+    if funds < trx.transaction.amount then Result.error Not_enought_funds
+    else Result.ok { chain with transactions = trx :: chain.transactions }

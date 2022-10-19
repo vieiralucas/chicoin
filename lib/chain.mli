@@ -12,4 +12,8 @@ val add_block : Block.t -> chain -> chain
 val last_block : chain -> Block.t
 val is_valid : chain -> bool
 val mine : chain -> chain
-val add_transaction : Transaction.Signed.t -> chain -> chain
+
+type add_transaction_error = Invalid_signature | Not_enought_funds
+
+val add_transaction :
+  Transaction.Signed.t -> chain -> (chain, add_transaction_error) result
