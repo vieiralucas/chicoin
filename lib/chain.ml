@@ -3,9 +3,19 @@ type chain = {
   blocks : Block.t list;
   transactions : Transaction.Signed.t list;
   difficulty : int;
+  reward : int;
 }
 
 and t = chain
+
+let create ?(difficulty = 1) ?(reward = 1000) () =
+  {
+    genesis = Block.genesis;
+    blocks = [];
+    transactions = [];
+    difficulty;
+    reward;
+  }
 
 let last_block chain =
   match List.nth_opt chain.blocks 0 with Some b -> b | None -> chain.genesis
@@ -21,60 +31,63 @@ let add_block block chain =
         chain.transactions;
   }
 
-let empty =
-  { genesis = Block.genesis; blocks = []; transactions = []; difficulty = 1 }
+type mine_error = Reward_transaction_sign_err
 
-let rec is_valid chain =
-  match chain.blocks with
-  | [] -> true
-  | b :: [] -> b.previous_hash = Block.hash chain.genesis
-  | b1 :: b2 :: bs ->
-      if b1.previous_hash <> Block.hash b2 then false
-      else is_valid { chain with blocks = b2 :: bs }
-
-let mine chain =
-  let rec pow block =
-    if Block.obeys_difficulty chain.difficulty block then block
-    else pow { block with nonce = block.nonce + 1 }
-  in
-  let lb = last_block chain in
-  let block =
-    pow
+let mine reward_addr chain =
+  let reward_trx =
+    Transaction.Signed.sign
       {
-        previous_hash = Block.hash lb;
-        transactions = chain.transactions;
-        nonce = 0;
+        source = Transaction.mint_public;
+        receiver = reward_addr;
+        amount = chain.reward;
       }
+      Transaction.mint_secret
   in
-  add_block block chain
+  match reward_trx with
+  | Some reward_trx ->
+      let rec pow block =
+        if Block.obeys_difficulty chain.difficulty block then block
+        else pow { block with nonce = block.nonce + 1 }
+      in
+      let lb = last_block chain in
+      let block =
+        pow
+          {
+            previous_hash = Block.hash lb;
+            transactions = reward_trx :: chain.transactions;
+            nonce = 0;
+          }
+      in
+      add_block block chain |> Result.ok
+  | None -> Result.error Reward_transaction_sign_err
 
-let funds_from_transaction (pk : Key.Public.t) (trx : Transaction.Transaction.t)
-    =
-  match (trx.source = pk, trx.receiver = pk) with
+let balance_from_transaction (addr : Key.Public.t)
+    (trx : Transaction.Transaction.t) =
+  match (trx.source = addr, trx.receiver = addr) with
   | true, false -> trx.amount * -1
   | false, true -> trx.amount
   | _ -> 0
 
-let funds_from_block (pk : Key.Public.t) (block : Block.t) =
+let balance_from_block (addr : Key.Public.t) (block : Block.t) =
   let trxs = block.transactions in
   List.fold_left
-    (fun amount (trx : Transaction.Signed.t) ->
-      amount + funds_from_transaction pk trx.transaction)
+    (fun balance (trx : Transaction.Signed.t) ->
+      balance + balance_from_transaction addr trx.transaction)
     0 trxs
 
-let funds_from_chain (pk : Key.Public.t) (chain : chain) =
-  let amount =
+let balance (addr : Key.Public.t) (chain : chain) =
+  let balance =
     List.fold_left
-      (fun amount block -> amount + funds_from_block pk block)
+      (fun balance block -> balance + balance_from_block addr block)
       0 chain.blocks
   in
-  amount + funds_from_block pk chain.genesis
+  balance + balance_from_block addr chain.genesis
 
 type add_transaction_error = Invalid_signature | Not_enought_funds
 
 let add_transaction trx chain =
   if not (Transaction.Signed.verify trx) then Result.error Invalid_signature
   else
-    let funds = funds_from_chain trx.transaction.source chain in
-    if funds < trx.transaction.amount then Result.error Not_enought_funds
+    let balance = balance trx.transaction.source chain in
+    if balance < trx.transaction.amount then Result.error Not_enought_funds
     else Result.ok { chain with transactions = trx :: chain.transactions }

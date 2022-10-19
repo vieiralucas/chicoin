@@ -4,197 +4,90 @@ open Camelochain.Chain
 
 let check_block = testable Block.pp_block Block.equal_block
 
-let check_signed_transaction =
-  testable Transaction.Signed.pp_signed_transaction
-    Transaction.Signed.equal_signed_transaction
-
 let () =
   run "Chain"
     [
-      ( "empty",
+      ( "create",
         [
           ( "contains only genesis",
             `Quick,
             fun _ ->
+              let empty = create () in
               (check int) "" 0 (List.length empty.blocks);
               (check int) "" 0 (List.length empty.transactions);
               (check check_block) "" Block.genesis empty.genesis );
-          ( "has difficulty 1",
+          ( "accepts difficulty",
             `Quick,
-            fun _ -> (check int) "" 1 empty.difficulty );
-        ] );
-      ( "add_block",
-        [
-          ( "adds block to end of chain",
+            fun _ -> (check int) "" 2 (create ~difficulty:2 ()).difficulty );
+          ( "defaults difficulty to 1",
             `Quick,
-            fun _ ->
-              let block : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [];
-                  nonce = 0;
-                }
-              in
-              let chain = add_block block empty in
-
-              (check int) "" 1 (List.length chain.blocks);
-              (check check_block) "" block (last_block chain) );
-          ( "remove block transactions from chain transactions",
+            fun _ -> (check int) "" 1 (create ()).difficulty );
+          ( "accepts reward",
             `Quick,
-            fun _ ->
-              let secret = Key.Secret.generate () in
-              let source = Key.Public.of_secret secret in
-              let receiver = Key.Public.of_secret secret in
-              let t1 : Transaction.Transaction.t =
-                { source; receiver; amount = 10 }
-              in
-              let t1 = Transaction.Signed.sign t1 secret |> Option.get in
-              let t2 : Transaction.Transaction.t =
-                { source; receiver; amount = 20 }
-              in
-              let t2 = Transaction.Signed.sign t2 secret |> Option.get in
-              let block : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [ t1 ];
-                  nonce = 0;
-                }
-              in
-              let chain =
-                Result.bind (add_transaction t1 empty) (add_transaction t2)
-                |> Result.map (add_block block)
-                |> Result.get_ok
-              in
-
-              (check int) "" 1 (List.length chain.transactions);
-              (check check_signed_transaction)
-                "" t2
-                (List.hd chain.transactions) );
-          ( "chain remains valid",
+            fun _ -> (check int) "" 2000 (create ~reward:2000 ()).reward );
+          ( "defaults reward to 1000",
             `Quick,
-            fun _ ->
-              let chain = empty in
-              (check bool) "" true (is_valid chain);
-              let block : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [];
-                  nonce = 0;
-                }
-              in
-              let chain = add_block block chain in
-              (check bool) "" true (is_valid chain) );
-        ] );
-      ( "last_block",
-        [
-          ( "returns genesis for empty chain",
-            `Quick,
-            fun _ -> (check bool) "" true (Block.genesis = last_block empty) );
-          ( "returns last block of the chain",
-            `Quick,
-            fun _ ->
-              let block : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [];
-                  nonce = 0;
-                }
-              in
-              let chain = add_block block empty in
-              (check check_block) "" block (last_block chain) );
-        ] );
-      ( "is_valid",
-        [
-          ( "returns true when empty",
-            `Quick,
-            fun _ -> (check bool) "" true (is_valid empty) );
-          ( "returns true when last block points to genesis",
-            `Quick,
-            fun _ ->
-              let chain : Chain.t =
-                {
-                  genesis = Block.genesis;
-                  blocks =
-                    [
-                      {
-                        previous_hash = Block.hash Block.genesis;
-                        transactions = [];
-                        nonce = 0;
-                      };
-                    ];
-                  transactions = [];
-                  difficulty = 0;
-                }
-              in
-              (check bool) "" true (is_valid chain) );
-          ( "returns true when all blocks point to previous",
-            `Quick,
-            fun _ ->
-              let b1 : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [];
-                  nonce = 0;
-                }
-              in
-              let b2 : Block.t =
-                { previous_hash = Block.hash b1; transactions = []; nonce = 0 }
-              in
-              let b3 : Block.t =
-                { previous_hash = Block.hash b2; transactions = []; nonce = 0 }
-              in
-              (check bool) "" true
-                (is_valid
-                   {
-                     genesis = Block.genesis;
-                     blocks = [ b3; b2; b1 ];
-                     transactions = [];
-                     difficulty = 0;
-                   }) );
-          ( "returns false when content of a block changes",
-            `Quick,
-            fun _ ->
-              let b1 : Block.t =
-                {
-                  previous_hash = Block.hash Block.genesis;
-                  transactions = [];
-                  nonce = 0;
-                }
-              in
-              let b2 : Block.t =
-                { previous_hash = Block.hash b1; transactions = []; nonce = 0 }
-              in
-              let b3 : Block.t =
-                { previous_hash = Block.hash b2; transactions = []; nonce = 0 }
-              in
-              let b2 = { b2 with nonce = 1 } in
-              let chain =
-                {
-                  genesis = Block.genesis;
-                  blocks = [ b3; b2; b1 ];
-                  transactions = [];
-                  difficulty = 0;
-                }
-              in
-              (check bool) "" false (is_valid chain) );
+            fun _ -> (check int) "" 1000 (create ()).reward );
         ] );
       ( "mine",
         [
-          ( "adds a new block to the end of the chain",
+          ( "rewards miner",
             `Quick,
             fun _ ->
-              let chain = mine empty in
+              let empty = create () in
+              let miner_sk = Key.Secret.generate () in
+              let miner_pk = Key.Public.of_secret miner_sk in
+
+              let chain = mine miner_pk empty |> Result.get_ok in
+
+              (check int) "" 1000 (balance miner_pk chain) );
+          ( "consumes transactions",
+            `Quick,
+            fun _ ->
+              let empty = create () in
+              let miner_sk = Key.Secret.generate () in
+              let miner_pk = Key.Public.of_secret miner_sk in
+
+              let receiver_1 = Key.Public.of_secret (Key.Secret.generate ()) in
+              let receiver_2 = Key.Public.of_secret (Key.Secret.generate ()) in
+
+              let chain = mine miner_pk empty |> Result.get_ok in
+
+              let t1 =
+                Transaction.Signed.sign
+                  { source = miner_pk; receiver = receiver_1; amount = 10 }
+                  miner_sk
+                |> Option.get
+              in
+              let t2 =
+                Transaction.Signed.sign
+                  { source = miner_pk; receiver = receiver_2; amount = 20 }
+                  miner_sk
+                |> Option.get
+              in
+              let chain = add_transaction t1 chain |> Result.get_ok in
+              let chain = add_transaction t2 chain |> Result.get_ok in
+              let chain = mine miner_pk chain |> Result.get_ok in
+
+              (check int) "" 0 (List.length chain.transactions);
+              (check int) "" 10 (balance receiver_1 chain);
+              (check int) "" 20 (balance receiver_2 chain);
+              (check int) "" (chain.reward - 30 + 1000) (balance miner_pk chain)
+          );
+          ( "adds a new block",
+            `Quick,
+            fun _ ->
+              let addr = Key.Public.of_secret (Key.Secret.generate ()) in
+              let chain = mine addr (create ()) |> Result.get_ok in
               (check int) "" 1 (List.length chain.blocks) );
           ( "new block obeys difficulty",
             `Quick,
             fun _ ->
-              let chain = mine { empty with difficulty = 2 } in
-              let block = last_block chain in
+              let addr = Key.Public.of_secret (Key.Secret.generate ()) in
+              let chain =
+                mine addr (create ~difficulty:2 ()) |> Result.get_ok
+              in
+              let block = List.hd chain.blocks in
               (check bool) "" true (Block.obeys_difficulty 2 block) );
-          ( "new chain is valid",
-            `Quick,
-            fun _ ->
-              let chain = mine empty in
-              (check bool) "" true (is_valid chain) );
         ] );
     ]
