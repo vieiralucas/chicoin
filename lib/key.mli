@@ -1,5 +1,5 @@
 module Secret : sig
-  type secret = Secp256k1.Key.secret Secp256k1.Key.t
+  type secret = private Secp256k1.Key.secret Secp256k1.Key.t
   type t = secret [@@deriving eq, show]
 
   val generate : unit -> secret
@@ -10,7 +10,7 @@ module Secret : sig
 end
 
 module Public : sig
-  type pub = Secp256k1.Key.public Secp256k1.Key.t
+  type pub = private Secp256k1.Key.public Secp256k1.Key.t
   type t = pub [@@deriving eq, show]
 
   val of_secret : Secret.t -> pub

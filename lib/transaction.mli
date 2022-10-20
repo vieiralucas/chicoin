@@ -15,7 +15,7 @@ module Transaction : sig
 end
 
 module Signed : sig
-  type signed_transaction = {
+  type signed_transaction = private {
     signature : Key.Signature.t;
     transaction : Transaction.t;
   }

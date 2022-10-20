@@ -1,4 +1,4 @@
-type hash = Hash of string [@@deriving eq, show]
+type hash = private Hash of string [@@deriving eq, show]
 and t = hash
 
 val empty : hash
