@@ -9,6 +9,7 @@ module Transaction = struct
     source : Key.Public.t;
     receiver : Key.Public.t;
     amount : int;
+    fee : int;
   }
 
   and t = transaction [@@deriving eq, show]
@@ -17,7 +18,8 @@ module Transaction = struct
     let s = Cstruct.string (Key.Public.to_b58_s transaction.source) in
     let r = Cstruct.string (Key.Public.to_b58_s transaction.receiver) in
     let a = Cstruct.string (string_of_int transaction.amount) in
-    Cstruct.concat [ s; r; a ]
+    let f = Cstruct.string (string_of_int transaction.fee) in
+    Cstruct.concat [ s; r; a; f ]
 
   let hash trx = to_bin trx |> Hash.of_bin
 end
@@ -48,5 +50,7 @@ module Signed = struct
     Key.Signature.verify pk trx.signature hash
 
   let mint addr reward =
-    sign { source = mint_public; receiver = addr; amount = reward } mint_secret
+    sign
+      { source = mint_public; receiver = addr; amount = reward; fee = 0 }
+      mint_secret
 end

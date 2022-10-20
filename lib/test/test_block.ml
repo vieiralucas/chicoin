@@ -28,6 +28,7 @@ let () =
                     source = Key.Public.of_secret secret;
                     receiver = Key.Public.of_secret secret;
                     amount = 1;
+                    fee = 0;
                   }
                   secret
                 |> Option.get
@@ -38,6 +39,7 @@ let () =
                     source = Key.Public.of_secret secret;
                     receiver = Key.Public.of_secret secret;
                     amount = 2;
+                    fee = 0;
                   }
                   secret
                 |> Option.get
@@ -126,7 +128,9 @@ let () =
               let source = Key.Public.of_secret secret in
               let receiver = Key.Public.of_secret secret in
               let transaction : Transaction.Signed.t =
-                Transaction.Signed.sign { source; receiver; amount = 1 } secret
+                Transaction.Signed.sign
+                  { source; receiver; amount = 1; fee = 0 }
+                  secret
                 |> Option.get
               in
               let b2 =

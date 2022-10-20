@@ -3,6 +3,7 @@ module Transaction : sig
     source : Key.Public.t;
     receiver : Key.Public.t;
     amount : int;
+    fee : int;
   }
 
   and t = transaction [@@deriving eq, show]

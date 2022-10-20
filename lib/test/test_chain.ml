@@ -41,39 +41,52 @@ let () =
               let chain = mine miner_pk empty |> Result.get_ok in
 
               (check int) "" 1000 (balance miner_pk chain) );
-          ( "consumes transactions",
+          ( "consumes transactions and rewards miner with fees",
             `Quick,
             fun _ ->
               let empty = create () in
-              let miner_sk = Key.Secret.generate () in
-              let miner_pk = Key.Public.of_secret miner_sk in
+              let miner1_sk = Key.Secret.generate () in
+              let miner1_pk = Key.Public.of_secret miner1_sk in
 
               let receiver_1 = Key.Public.of_secret (Key.Secret.generate ()) in
               let receiver_2 = Key.Public.of_secret (Key.Secret.generate ()) in
 
-              let chain = mine miner_pk empty |> Result.get_ok in
+              let chain = mine miner1_pk empty |> Result.get_ok in
 
               let t1 =
                 Transaction.Signed.sign
-                  { source = miner_pk; receiver = receiver_1; amount = 10 }
-                  miner_sk
+                  {
+                    source = miner1_pk;
+                    receiver = receiver_1;
+                    amount = 10;
+                    fee = 2;
+                  }
+                  miner1_sk
                 |> Option.get
               in
               let t2 =
                 Transaction.Signed.sign
-                  { source = miner_pk; receiver = receiver_2; amount = 20 }
-                  miner_sk
+                  {
+                    source = miner1_pk;
+                    receiver = receiver_2;
+                    amount = 20;
+                    fee = 8;
+                  }
+                  miner1_sk
                 |> Option.get
               in
               let chain = add_transaction t1 chain |> Result.get_ok in
               let chain = add_transaction t2 chain |> Result.get_ok in
-              let chain = mine miner_pk chain |> Result.get_ok in
+
+              let miner2_sk = Key.Secret.generate () in
+              let miner2_pk = Key.Public.of_secret miner2_sk in
+              let chain = mine miner2_pk chain |> Result.get_ok in
 
               (check int) "" 0 (List.length chain.transactions);
               (check int) "" 10 (balance receiver_1 chain);
               (check int) "" 20 (balance receiver_2 chain);
-              (check int) "" (chain.reward - 30 + 1000) (balance miner_pk chain)
-          );
+              (check int) "" (chain.reward - 30) (balance miner1_pk chain);
+              (check int) "" (chain.reward + 10) (balance miner2_pk chain) );
           ( "adds a new block",
             `Quick,
             fun _ ->

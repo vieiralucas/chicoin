@@ -34,7 +34,13 @@ let add_block block chain =
 type mine_error = Reward_transaction_sign_err
 
 let mine reward_addr chain =
-  let reward_trx = Transaction.Signed.mint reward_addr chain.reward in
+  let fee =
+    List.fold_left
+      (fun fee (trx : Transaction.Signed.t) -> fee + trx.transaction.fee)
+      0 chain.transactions
+  in
+  let reward = chain.reward + fee in
+  let reward_trx = Transaction.Signed.mint reward_addr reward in
   match reward_trx with
   | Some reward_trx ->
       let rec pow block =
@@ -81,5 +87,6 @@ let add_transaction trx chain =
   if not (Transaction.Signed.verify trx) then Result.error Invalid_signature
   else
     let balance = balance trx.transaction.source chain in
-    if balance < trx.transaction.amount then Result.error Not_enought_funds
+    if balance < trx.transaction.amount + trx.transaction.fee then
+      Result.error Not_enought_funds
     else Result.ok { chain with transactions = trx :: chain.transactions }
