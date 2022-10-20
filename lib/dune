@@ -1,5 +1,15 @@
 (library
  (name camelochain)
- (libraries sha)
+ (libraries
+  bigstring
+  cstruct
+  hex
+  mirage-crypto
+  mirage-crypto-rng
+  mirage-crypto-rng.unix
+  secp256k1
+  tezos-base58)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq))
  (instrumentation
   (backend bisect_ppx)))

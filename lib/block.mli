@@ -1,7 +1,11 @@
-type block = { previous_hash : Sha256.t; nonce : int }
-and t = block
+type block = {
+  previous_hash : Hash.t;
+  transactions : Transaction.Signed.t list;
+  nonce : int;
+}
+
+and t = block [@@deriving eq, show]
 
 val genesis : block
-val hash : block -> Sha256.t
-val equal : block -> block -> bool
+val hash : block -> Hash.t
 val obeys_difficulty : int -> block -> bool

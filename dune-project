@@ -18,13 +18,29 @@
  (synopsis "Camel chaining")
  (description "A blockchain written in OCaml")
  (depends
-  dune
-  ocamlformat
-  (sha
-   (>= 1.15))
   (alcotest
    (>= 1.6))
+  (bigstring
+   (>= 0.3))
   (bisect_ppx
-   (>= 2.8)))
+   (>= 2.8))
+  (cstruct
+   (>= 6.0))
+  (hex
+   (>= 1.5))
+  (mirage-crypto
+   (>= 0.10))
+  (mirage-crypto-rng
+   (>= 0.10))
+  (secp256k1
+   (>= 0.4))
+  (tezos-base58
+   (>= 1.0))
+  (ppx_deriving
+   (>= 5.2))
+  (qcheck-alcotest
+   (>= 0.19))
+  dune
+  ocamlformat)
  (tags
   (blockchain cryptocurrency)))

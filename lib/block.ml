@@ -1,14 +1,24 @@
-type block = { previous_hash : Sha256.t; nonce : int }
-and t = block
+type block = {
+  previous_hash : Hash.t;
+  transactions : Transaction.Signed.t list;
+  nonce : int;
+}
 
-let genesis = { previous_hash = Sha256.zero; nonce = 0 }
+and t = block [@@deriving eq, show]
+
+let genesis = { previous_hash = Hash.empty; transactions = []; nonce = 0 }
 
 let hash block =
-  Sha256.to_hex block.previous_hash ^ string_of_int block.nonce |> Sha256.string
-
-let equal b1 b2 = Sha256.to_hex (hash b1) = Sha256.to_hex (hash b2)
+  let b = Hash.show block.previous_hash |> Cstruct.string in
+  let b =
+    Cstruct.concat (List.map Transaction.Signed.to_bin block.transactions)
+    |> Cstruct.append b
+  in
+  (* TODO: convert int to bin instead of int -> str -> bin *)
+  let b = Cstruct.string (string_of_int block.nonce) |> Cstruct.append b in
+  Hash.of_bin b
 
 let obeys_difficulty difficulty block =
-  let h = hash block |> Sha256.to_hex in
+  let h = hash block in
   let prefix = String.make difficulty '0' in
-  String.starts_with ~prefix h
+  Hash.starts_with prefix h
