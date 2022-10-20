@@ -1,6 +1,3 @@
-val mint_secret : Key.Secret.t
-val mint_public : Key.Public.t
-
 module Transaction : sig
   type transaction = {
     source : Key.Public.t;
@@ -26,4 +23,5 @@ module Signed : sig
   val hash : signed_transaction -> Hash.t
   val to_bin : signed_transaction -> Cstruct.t
   val verify : signed_transaction -> bool
+  val mint : Key.Public.t -> int -> signed_transaction option
 end

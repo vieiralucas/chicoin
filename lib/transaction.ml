@@ -46,4 +46,7 @@ module Signed = struct
     let pk = trx.transaction.source in
     let hash = Transaction.hash trx.transaction in
     Key.Signature.verify pk trx.signature hash
+
+  let mint addr reward =
+    sign { source = mint_public; receiver = addr; amount = reward } mint_secret
 end

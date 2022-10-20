@@ -34,15 +34,7 @@ let add_block block chain =
 type mine_error = Reward_transaction_sign_err
 
 let mine reward_addr chain =
-  let reward_trx =
-    Transaction.Signed.sign
-      {
-        source = Transaction.mint_public;
-        receiver = reward_addr;
-        amount = chain.reward;
-      }
-      Transaction.mint_secret
-  in
+  let reward_trx = Transaction.Signed.mint reward_addr chain.reward in
   match reward_trx with
   | Some reward_trx ->
       let rec pow block =
