@@ -15,6 +15,7 @@ impl Transaction {
         let bin = bincode::serialize(&self)?;
         let hash = Sha256::digest(bin);
         let message = Message::from_slice(&hash)?;
+
         Ok(SignedTransaction {
             trx: self,
             signature: secret.sign_ecdsa(message),

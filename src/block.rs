@@ -4,7 +4,7 @@ use sha2::{Digest, Sha256};
 
 use crate::transaction::SignedTransaction;
 
-type S256 = [u8; 32];
+pub type S256 = [u8; 32];
 
 #[derive(Debug, Serialize)]
 pub struct Block {
