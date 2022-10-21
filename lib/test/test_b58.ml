@@ -1,5 +1,5 @@
 open Alcotest
-open Camelochain
+open Chicoin
 
 let b58_test_str = "4FsZFKpcvjEFhRc9bwFHw"
 let check_b58 = testable B58.pp B58.equal

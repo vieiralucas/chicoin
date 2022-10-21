@@ -1,23 +1,23 @@
 (test
  (name test_block)
- (package camelochain)
+ (package chicoin)
  (modules test_block)
- (libraries alcotest camelochain))
+ (libraries alcotest chicoin))
 
 (test
  (name test_chain)
- (package camelochain)
+ (package chicoin)
  (modules test_chain)
- (libraries alcotest camelochain))
+ (libraries alcotest chicoin))
 
 (test
  (name test_b58)
- (package camelochain)
+ (package chicoin)
  (modules test_b58)
- (libraries alcotest camelochain qcheck-alcotest))
+ (libraries alcotest chicoin qcheck-alcotest))
 
 (test
  (name test_key)
- (package camelochain)
+ (package chicoin)
  (modules test_key)
- (libraries alcotest camelochain qcheck-alcotest))
+ (libraries alcotest chicoin qcheck-alcotest))

@@ -1,4 +1,4 @@
 (executable
- (public_name camelochain)
+ (public_name chicoin)
  (name main)
- (libraries camelochain))
+ (libraries chicoin))

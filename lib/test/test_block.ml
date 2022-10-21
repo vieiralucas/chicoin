@@ -1,6 +1,6 @@
 open Alcotest
-open Camelochain
-open Camelochain.Block
+open Chicoin
+open Chicoin.Block
 
 let check_block = testable Block.pp_block Block.equal_block
 let check_hash = testable Hash.pp_hash Hash.equal_hash
