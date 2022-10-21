@@ -1,4 +1,0 @@
-(executable
- (public_name chicoin)
- (name main)
- (libraries chicoin))
