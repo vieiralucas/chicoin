@@ -1,5 +1,5 @@
 (library
- (name camelochain)
+ (name chicoin)
  (libraries
   bigstring
   cstruct

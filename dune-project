@@ -1,11 +1,11 @@
 (lang dune 3.4)
 
-(name camelochain)
+(name chicoin)
 
 (generate_opam_files true)
 
 (source
- (github vieiralucas/camelochain))
+ (github vieiralucas/chicoin))
 
 (authors "Lucas Vieira")
 
@@ -14,8 +14,8 @@
 (license "MIT")
 
 (package
- (name camelochain)
- (synopsis "Camel chaining")
+ (name chicoin)
+ (synopsis "Blockchain")
  (description "A blockchain written in OCaml")
  (depends
   (alcotest
