@@ -23,7 +23,7 @@ fn test_chain() -> anyhow::Result<()> {
         amount: 10,
     }
     .sign(miner.secret_key())?;
-    chain.add_transaction(t1);
+    chain.add_transaction(t1)?;
 
     let t2 = Transaction {
         source: miner.public_key(),
@@ -31,7 +31,7 @@ fn test_chain() -> anyhow::Result<()> {
         amount: 20,
     }
     .sign(miner.secret_key())?;
-    chain.add_transaction(t2);
+    chain.add_transaction(t2)?;
 
     chain.mine(miner.public_key())?;
 
