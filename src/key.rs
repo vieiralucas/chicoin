@@ -27,11 +27,17 @@ pub struct PK(secp256k1::PublicKey);
 #[derive(Serialize, Debug, Clone, Copy)]
 pub struct SK(secp256k1::SecretKey);
 
+fn to_message<T: Serialize>(value: T) -> anyhow::Result<Message> {
+    let bin = bincode::serialize(&value)?;
+    let hash = Sha256::digest(bin);
+    let message = Message::from_slice(&hash)?;
+
+    Ok(message)
+}
+
 impl SK {
     pub fn sign<T: Serialize>(self, value: T) -> anyhow::Result<Signature> {
-        let bin = bincode::serialize(&value)?;
-        let hash = Sha256::digest(bin);
-        let message = Message::from_slice(&hash)?;
+        let message = to_message(value)?;
         let signature = self.0.sign_ecdsa(message);
 
         Ok(Signature(signature))
@@ -42,10 +48,9 @@ pub struct Signature(ecdsa::Signature);
 
 impl Signature {
     pub fn verify<T: Serialize>(self, value: &T, pk: &PK) -> anyhow::Result<()> {
-        let bin = bincode::serialize(value)?;
-        let hash = Sha256::digest(bin);
-        let message = Message::from_slice(&hash)?;
+        let message = to_message(value)?;
         self.0.verify(&message, &pk.0)?;
+
         Ok(())
     }
 }
