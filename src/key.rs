@@ -12,6 +12,11 @@ impl Pair {
         Self(secp256k1::KeyPair::new(&secp, &mut thread_rng()))
     }
 
+    pub fn from_secret(sk: SK) -> Self {
+        let secp = Secp256k1::new();
+        Self(sk.0.keypair(&secp))
+    }
+
     pub fn public(&self) -> PK {
         PK(self.0.public_key())
     }
@@ -26,6 +31,18 @@ pub struct PK(secp256k1::PublicKey);
 
 #[derive(Serialize, Debug, Clone, Copy)]
 pub struct SK(secp256k1::SecretKey);
+
+impl SK {
+    pub fn from_slice(slice: &[u8]) -> anyhow::Result<Self> {
+        Ok(Self(secp256k1::SecretKey::from_slice(slice)?))
+    }
+}
+
+impl std::fmt::Display for SK {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.display_secret().fmt(f)
+    }
+}
 
 fn to_message<T: Serialize>(value: T) -> anyhow::Result<Message> {
     let bin = bincode::serialize(&value)?;
