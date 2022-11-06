@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::key::PK;
@@ -6,7 +6,7 @@ use crate::transaction::Transaction;
 
 pub type S256 = [u8; 32];
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Block {
     pub previous_hash: S256,
     pub transactions: Vec<Transaction>,

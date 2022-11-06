@@ -1,9 +1,9 @@
 use secp256k1::rand::thread_rng;
 use secp256k1::{ecdsa, Message, Secp256k1};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Pair(secp256k1::KeyPair);
 
 impl Pair {
@@ -26,7 +26,7 @@ impl Pair {
     }
 }
 
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PK(secp256k1::PublicKey);
 
 #[derive(Serialize, Debug, Clone, Copy)]
