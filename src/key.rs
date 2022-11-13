@@ -1,15 +1,20 @@
 use secp256k1::rand::thread_rng;
 use secp256k1::{ecdsa, Message, Secp256k1};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Pair(secp256k1::KeyPair);
 
 impl Pair {
     pub fn create() -> Self {
         let secp = Secp256k1::new();
         Self(secp256k1::KeyPair::new(&secp, &mut thread_rng()))
+    }
+
+    pub fn from_secret(sk: SK) -> Self {
+        let secp = Secp256k1::new();
+        Self(sk.0.keypair(&secp))
     }
 
     pub fn public(&self) -> PK {
@@ -21,11 +26,23 @@ impl Pair {
     }
 }
 
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PK(secp256k1::PublicKey);
 
 #[derive(Serialize, Debug, Clone, Copy)]
 pub struct SK(secp256k1::SecretKey);
+
+impl SK {
+    pub fn from_slice(slice: &[u8]) -> anyhow::Result<Self> {
+        Ok(Self(secp256k1::SecretKey::from_slice(slice)?))
+    }
+}
+
+impl std::fmt::Display for SK {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.display_secret().fmt(f)
+    }
+}
 
 fn to_message<T: Serialize>(value: T) -> anyhow::Result<Message> {
     let bin = bincode::serialize(&value)?;
